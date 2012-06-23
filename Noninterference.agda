@@ -2,8 +2,9 @@ open import Policies
 open import StateMachines
 
 module Noninterference
+  {ℓ₁ ℓ₂ ℓ₃}
   (SC : DecSecurityPolicy)
-  (M : DetStateMachine)
+  (M : DetStateMachine {ℓ₁} {ℓ₂} {ℓ₃})
   (dom : DetStateMachine.A M → DecSecurityPolicy.SD SC) where
 
 open DecSecurityPolicy SC
@@ -25,19 +26,19 @@ purge (a ∷ as) d with dom a ↝? d
 purge (a ∷ as) d | yes p = a ∷ purge as d
 purge (a ∷ as) d | no ¬p = purge as d
 
-noninterferent : Set
+noninterferent : Set _
 noninterferent = ∀ τ a → output τ a ≡ output (purge τ (dom a)) a
 
 module Unwinding (_∼[_]_ : Σ → SD → Σ → Set)
                  (∼-equiv : ∀ d → IsEquivalence (λ σ σ' → σ ∼[ d ] σ'))
   where
-  output-consistent : Set
+  output-consistent : Set _
   output-consistent = ∀ {σ σ' a} → σ ∼[ dom a ] σ' → out σ a ≡ out σ' a
 
-  step-consistent : Set
+  step-consistent : Set _
   step-consistent = ∀ {σ σ' a d} → σ ∼[ d ] σ' → dom a ↝ d → do σ a ∼[ d ] do σ' a
 
-  locally-respects : Set
+  locally-respects : Set _
   locally-respects = ∀ {σ a d} → ¬ (dom a ↝ d) → σ ∼[ d ] do σ a
 
   module UnwindingCorrect (oc : output-consistent)
@@ -56,9 +57,9 @@ module Unwinding (_∼[_]_ : Σ → SD → Σ → Set)
     lemma2 : ∀ {σ₁ σ₂ d} τ → σ₁ ∼[ d ] σ₂ → do⋆ σ₁ τ ∼[ d ] do⋆ σ₂ (purge τ d)
     lemma2 [] sim = sim
     lemma2 {d = d} (a ∷ τ) sim with dom a ↝? d
-    lemma2 (a ∷ τ) sim | yes p = sc (lemma2 τ sim) p
-    lemma2 {σ} {σ'} {d = d} (a ∷ τ) sim | no ¬p = begin
-      do (do⋆ σ τ) a ≈⟨ sym (lc ¬p) ⟩
+    lemma2 (a ∷ τ) sim | yes may-flow = sc (lemma2 τ sim) may-flow
+    lemma2 {σ} {σ'} {d} (a ∷ τ) sim | no no-flow = begin
+      do (do⋆ σ τ) a ≈⟨ sym (lc no-flow) ⟩
       do⋆ σ τ ≈⟨ lemma2 τ sim ⟩
       do⋆ σ' (purge τ d) ∎
       where open Pre (∼-preorder d)
@@ -67,4 +68,3 @@ module Unwinding (_∼[_]_ : Σ → SD → Σ → Set)
 
     is-noninterferent : noninterferent
     is-noninterferent τ a = oc (lemma2 τ (IsEquivalence.refl (∼-equiv (dom a))))
-
