@@ -82,7 +82,23 @@ record StateEventSystem {ℓ₁ ℓ₂} : Set (Level.suc (ℓ₁ ⊔ ℓ₂)) wh
   field
     S : Set ℓ₁
     E : Set ℓ₂
-    I , O : E → Set ℓ₂
-    I-O-disjoint : ∀ e → (I e → ¬ O e) × (O e → ¬ I e)
-    T : S → E → S → Set (ℓ₁ ⊔ ℓ₂)
-    deterministic : ∀ {s s' s'' e} → T s e s' → T s e s'' → s' ≡ s''
+    I : E → Bool
+    O : E → Bool
+    I-O-disjoint : bools-disjoint I O
+    Ts : S → E → S → Set (ℓ₁ ⊔ ℓ₂)
+    deterministic : ∀ {s s' s'' e} → Ts s e s' → Ts s e s'' → s' ≡ s''
+
+SES : ∀ {ℓ} → EventSystem {ℓ} → StateEventSystem {ℓ} {ℓ}
+SES ES = record {
+           E = E;
+           S = List E;
+           I = I;
+           O = O;
+           I-O-disjoint = I-O-disjoint;
+           Ts = Ts;
+           deterministic = λ {s} ts ts' → det {s} ts ts' }
+  where open EventSystem ES
+        Ts : List E → E → List E → Set _
+        Ts s e s' = Tr (s ∷ʳ e) × s' ≡ s ∷ʳ e
+        det : ∀ {s s' s'' e} → Ts s e s' → Ts s e s'' → s' ≡ s''
+        det (_ , eq₁) (_ , eq₂) rewrite eq₁ | eq₂ = refl
