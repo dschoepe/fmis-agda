@@ -1,3 +1,4 @@
+open import Data.Bool
 open import Data.List
 open import Data.Product renaming (Σ to Σt)
 open import Data.Sum
@@ -47,12 +48,16 @@ record NondetStateMachine {ℓ} : Set (Level.suc ℓ) where
   output : List A → A → O → Set ℓ
   output as a o = ∃ (λ σ → run as σ × out σ a o)
 
+bools-disjoint : ∀ {ℓ} {A : Set ℓ} → (b b' : A → Bool) → Set ℓ
+bools-disjoint b b' = ∀ a → (T (b a) → ¬ T (b' a)) × (T (b' a) → ¬ T (b a))
+
 record EventSystem {ℓ} : Set (Level.suc ℓ) where
   field
     E : Set ℓ
-    I : E → Set ℓ
-    O : E → Set ℓ
-    I-O-disjoint : ∀ e → (I e → ¬ O e) × (O e → ¬ I e)
+    I : E → Bool
+    O : E → Bool
+    I-O-disjoint : bools-disjoint I O
+ -- ∀ e → (T (I e) → ¬ (T (O e))) × (T (O e) → ¬ T (I e))
     Tr : List E → Set ℓ
     prefix-closed : ∀ {x} xs → Tr (xs ∷ʳ x) → Tr xs
 
