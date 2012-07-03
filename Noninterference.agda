@@ -1,9 +1,9 @@
 open import Policies
-open import StateMachines
+open import ComputationalModels
 
 module Noninterference
-  {ℓ₁ ℓ₂ ℓ₃}
-  (SC : DecSecurityPolicy)
+  {ℓ₁ ℓ₂ ℓ₃ ℓ}
+  (SC : DecSecurityPolicy {ℓ})
   (M : DetStateMachine {ℓ₁} {ℓ₂} {ℓ₃})
   (dom : DetStateMachine.A M → DecSecurityPolicy.SD SC) where
 
