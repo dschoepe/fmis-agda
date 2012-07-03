@@ -57,7 +57,6 @@ record EventSystem {ℓ} : Set (Level.suc ℓ) where
     I : E → Bool
     O : E → Bool
     I-O-disjoint : bools-disjoint I O
- -- ∀ e → (T (I e) → ¬ (T (O e))) × (T (O e) → ¬ T (I e))
     Tr : List E → Set ℓ
     prefix-closed : ∀ {x} xs → Tr (xs ∷ʳ x) → Tr xs
 
