@@ -1,6 +1,7 @@
 module ExampleSystems where
 
 open import ComputationalModels
+open import Data.Bool
 open import Data.List
 open import Data.Nat
 open import Data.Empty
@@ -14,16 +15,16 @@ module PipeDown where
     hi : ℕ → E
     lo : ℕ → E
 
-  O : E → Set
-  O (hi x) = ⊥
-  O (lo x) = ⊤
-
-  I : E → Set
-  I (hi x) = ⊤
-  I (lo x) = ⊥
-
   private
-    disj : ∀ e → (I e → ¬ O e) × (O e → ¬ I e)
+    O : E → Bool
+    O (hi x) = false
+    O (lo x) = true
+
+    I : E → Bool
+    I (hi x) = true
+    I (lo x) = false
+
+    disj : bools-disjoint I O
     disj (hi x) = (λ x₁ x₂ → x₂) , (λ x₁ x₂ → x₁)
     disj (lo x) = (λ x₁ x₂ → x₁) , (λ x₁ x₂ → x₂)
 
@@ -51,16 +52,16 @@ module PipeUp where
     li : ℕ → E
     ho : ℕ → E
 
-  O : E → Set
-  O (li x) = ⊥
-  O (ho x) = ⊤
-
-  I : E → Set
-  I (li x) = ⊤
-  I (ho x) = ⊥
-
   private
-    disj : ∀ e → (I e → ¬ O e) × (O e → ¬ I e)
+    O : E → Bool
+    O (li x) = false
+    O (ho x) = true
+
+    I : E → Bool
+    I (li x) = true
+    I (ho x) = false
+
+    disj : bools-disjoint I O
     disj (li x) = (λ x₁ x₂ → x₂) , (λ x₁ x₂ → x₁)
     disj (ho x) = (λ x₁ x₂ → x₁) , (λ x₁ x₂ → x₂)
 
